@@ -1,83 +1,70 @@
-
 pipeline {
-	agent any
+    agent any
 
-	environment {
-		COMPOSER_ALLOW_XDEBUG = '0'
-		APP_ENV = 'testing'
-	}
+    environment {
+        APP_ENV = 'testing'
+        COMPOSER_ALLOW_XDEBUG = '0'
+    }
 
-	options {
-		timestamps()
-		ansiColor('xterm')
-		timeout(time: 60, unit: 'MINUTES')
-	}
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+    }
 
-	stages {
-		stage('Checkout') {
-			steps { checkout scm }
-		}
+    stages {
 
-		stage('Backend - Composer Install') {
-			steps {
-				echo 'Installing PHP dependencies (composer)'
-				sh 'composer --version'
-				sh 'composer install --no-interaction --prefer-dist --optimize-autoloader'
-			}
-		}
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-		stage('Backend - Prepare') {
-			steps {
-				echo 'Prepare .env and generate key'
-				sh '''
-				if [ ! -f .env ]; then
-				  cp .env.example .env || true
-				fi
-				php artisan key:generate || true
-				'''
-			}
-		}
+        stage('Verify Environment') {
+            steps {
+                sh 'php -v'
+                sh 'composer --version'
+            }
+        }
 
-		stage('Backend - Migrate & Test') {
-			steps {
-				echo 'Running migrations and tests'
-				sh '''
-				php artisan migrate --force || true
-				./vendor/bin/phpunit --configuration phpunit.xml || true
-				'''
-			}
-		}
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing PHP dependencies'
+                sh 'composer install --no-interaction --prefer-dist'
+            }
+        }
 
-		stage('Frontend - Build') {
-			steps {
-				echo 'Building frontend (../Frontend)'
-				dir('../Frontend') {
-					sh 'node --version || true'
-					sh 'npm --version || true'
-					sh 'npm ci --silent'
-					sh 'npm run build --silent'
-				}
-			}
-		}
+        stage('Prepare Laravel') {
+            steps {
+                echo 'Preparing Laravel environment'
+                sh '''
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                fi
+                php artisan key:generate
+                '''
+            }
+        }
 
-		stage('Archive Artifacts') {
-			steps {
-				archiveArtifacts artifacts: 'storage/logs/**', allowEmptyArchive: true
-			}
-		}
-	}
+        stage('Run Basic Tests') {
+            steps {
+                echo 'Running PHPUnit tests'
+                sh './vendor/bin/phpunit || true'
+            }
+        }
+    }
 
-	post {
-		always {
-			echo 'Cleaning workspace'
-			cleanWs()
-		}
-		success {
-			echo 'Pipeline succeeded'
-		}
-		failure {
-			echo 'Pipeline failed'
-		}
-	}
+    post {
+        always {
+            echo 'Cleaning workspace'
+            cleanWs()
+        }
+
+        success {
+            echo '✅ Pipeline completed successfully'
+        }
+
+        failure {
+            echo '❌ Pipeline failed'
+        }
+    }
 }
-
