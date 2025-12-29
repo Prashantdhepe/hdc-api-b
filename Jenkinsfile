@@ -75,6 +75,7 @@ pipeline {
 
     environment {
         APP_NAME = "hdc-backend"
+        DEPLOY_PATH = "/var/www/hdc"
     }
 
     stages {
@@ -88,12 +89,11 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 sh '''
-                  docker build \
-                    -t ${APP_NAME}:latest \
-                    -f docker/php/Dockerfile .
+                  docker build -t hdc-backend:latest .
                 '''
             }
         }
+
     }
 
     post {
@@ -105,4 +105,5 @@ pipeline {
         }
     }
 }
+
 
