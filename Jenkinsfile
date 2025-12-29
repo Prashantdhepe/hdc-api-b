@@ -3,13 +3,15 @@ pipeline {
 
     environment {
         APP_ENV = 'testing'
+        DEPLOY_DIR = '/var/www/hdc/BackendNew'
     }
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                echo 'Checking out code'
+                git branch: 'main',
+                    url: 'https://github.com/prashantdhepe94/hdc-api.git'
             }
         }
 
@@ -19,17 +21,23 @@ pipeline {
             }
         }
 
-        stage('Environment Setup') {
+        stage('Environment Setup (CI Only)') {
             steps {
-                sh 'cp .env.example .env || true'
-                sh 'php artisan key:generate'
+                sh '''
+                    if [ ! -f .env ]; then
+                        cp .env.example .env
+                        php artisan key:generate
+                    fi
+                '''
             }
         }
 
         stage('Config Cache Check') {
             steps {
-                sh 'php artisan config:clear'
-                sh 'php artisan config:cache'
+                sh '''
+                    php artisan config:clear
+                    php artisan config:cache
+                '''
             }
         }
 
@@ -39,14 +47,25 @@ pipeline {
             }
         }
 
+        stage('Deploy to Server') {
+            steps {
+                sh '''
+                    rsync -av --delete \
+                    --exclude=.env \
+                    --exclude=storage \
+                    --exclude=vendor \
+                    ./ $DEPLOY_DIR/
+                '''
+            }
+        }
     }
 
     post {
         failure {
-            echo '❌ API CI failed'
+            echo '❌ API CI/CD failed'
         }
         success {
-            echo '✅ API CI passed'
+            echo '✅ API CI/CD passed and deployed successfully'
         }
     }
 }
