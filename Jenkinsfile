@@ -23,7 +23,7 @@ pipeline {
       steps {
         script {
           docker.image('php:8.2-cli').inside('--user root') {
-            sh '''
+            bat '''
               apt-get update -y && apt-get install -y unzip git curl
               curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               composer --version
@@ -42,7 +42,7 @@ pipeline {
       steps {
         script {
           docker.image('php:8.2-cli').inside('--user root') {
-            sh '''
+            bat '''
               if [ ! -f .env ]; then
                 cp .env.example .env
               fi
@@ -57,7 +57,7 @@ pipeline {
       steps {
         script {
           docker.image('node:20').inside {
-            sh '''
+            bat '''
               npm ci --no-audit --no-fund
               npm run build
             '''
@@ -70,7 +70,7 @@ pipeline {
       steps {
         script {
           docker.image('php:8.2-cli').inside('--user root') {
-            sh '''
+            bat '''
               # create junit output location
               mkdir -p storage/logs
               # run tests and generate junit.xml for Jenkins
