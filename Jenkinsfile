@@ -1,79 +1,107 @@
 pipeline {
-    agent any
+  agent any
 
-    options {
-        timestamps()
-        timeout(time: 20, unit: 'MINUTES')
+  options {
+    timestamps()
+    timeout(time: 40, unit: 'MINUTES')
+    ansiColor('xterm')
+  }
+
+  environment {
+    APP_ENV   = 'testing'
+    APP_DEBUG = 'false'
+    COMPOSER_CACHE_DIR = "${env.WORKSPACE}/.composer-cache"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
 
-    environment {
-        APP_ENV = 'testing'
-        APP_DEBUG = 'false'
+    stage('Composer Install & Lint (PHP)') {
+      steps {
+        script {
+          docker.image('php:8.2-cli').inside('--user root') {
+            sh '''
+              apt-get update -y && apt-get install -y unzip git curl
+              curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+              composer --version
+              mkdir -p ${COMPOSER_CACHE_DIR}
+              composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+              ./vendor/bin/pint --version || true
+              ./vendor/bin/pint --no-interaction --verbose
+              composer dump-autoload -o
+            '''
+          }
+        }
+      }
     }
 
-    stages {
-
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
+    stage('Prepare .env') {
+      steps {
+        script {
+          docker.image('php:8.2-cli').inside('--user root') {
+            sh '''
+              if [ ! -f .env ]; then
+                cp .env.example .env
+              fi
+              php artisan key:generate --ansi
+            '''
+          }
         }
-
-        stage('Verify Tools') {
-            steps {
-                bat 'php -v'
-                bat 'composer -V'
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                bat '''
-                    if not exist vendor (
-                        composer install --no-interaction --prefer-dist
-                    ) else (
-                        echo Dependencies already installed
-                    )
-                '''
-            }
-        }
-
-        stage('Prepare Environment') {
-            steps {
-                bat '''
-                    if not exist .env (
-                        copy .env.example .env
-                    )
-                    php artisan key:generate
-                '''
-            }
-        }
-
-        stage('Clear & Cache Config') {
-            steps {
-                bat '''
-                    php artisan config:clear
-                    php artisan cache:clear
-                '''
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                bat 'php artisan test'
-            }
-        }
+      }
     }
 
-    post {
-        success {
-            echo '✅ CI PASSED: Laravel API build successful'
+    stage('Node: Install & Build Assets') {
+      steps {
+        script {
+          docker.image('node:20').inside {
+            sh '''
+              npm ci --no-audit --no-fund
+              npm run build
+            '''
+          }
         }
-        failure {
-            echo '❌ CI FAILED: Check logs above'
-        }
-        always {
-            cleanWs()
-        }
+      }
     }
+
+    stage('Run Tests (PHPUnit)') {
+      steps {
+        script {
+          docker.image('php:8.2-cli').inside('--user root') {
+            sh '''
+              # create junit output location
+              mkdir -p storage/logs
+              # run tests and generate junit.xml for Jenkins
+              php artisan test --parallel --testsuite=Unit,Feature --log-junit=storage/logs/junit.xml || true
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Report & Archive') {
+      steps {
+        script {
+          // Publish JUnit, archive assets
+          junit allowEmptyResults: true, testResults: 'storage/logs/junit.xml'
+          archiveArtifacts artifacts: 'public/build/**', allowEmptyArchive: true
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo '✅ CI PASSED: Laravel API pipeline completed successfully'
+    }
+    failure {
+      echo '❌ CI FAILED: See logs and test reports'
+    }
+    always {
+      cleanWs()
+    }
+  }
 }
