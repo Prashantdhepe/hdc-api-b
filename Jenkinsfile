@@ -15,13 +15,13 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'composer install --no-interaction --prefer-dist'
+                bat 'composer install --no-interaction --prefer-dist'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'php artisan test'
+                bat 'php artisan test'
             }
         }
 
