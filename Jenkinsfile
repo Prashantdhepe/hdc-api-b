@@ -6,6 +6,10 @@ pipeline {
     timeout(time: 40, unit: 'MINUTES')
   }
 
+  parameters {
+    booleanParam(name: 'MANUAL_TRIGGER', defaultValue: false, description: 'Set true to run CI; if false, main stages will be skipped (prevents automatic triggers)')
+  }
+
   environment {
     APP_ENV   = 'testing'
     APP_DEBUG = 'false'
@@ -19,7 +23,20 @@ pipeline {
       }
     }
 
+    stage('Manual Gate') {
+      steps {
+        script {
+          if (!params.MANUAL_TRIGGER) {
+            echo 'MANUAL_TRIGGER=false — main stages will be skipped. To run, re-run and set MANUAL_TRIGGER=true.'
+          } else {
+            echo 'MANUAL_TRIGGER=true — proceeding with pipeline.'
+          }
+        }
+      }
+    }
+
     stage('Composer Install & Lint (PHP)') {
+      when { expression { return params.MANUAL_TRIGGER == true } }
       steps {
         script {
           docker.image('php:8.2-cli').inside('--user root') {
@@ -39,6 +56,7 @@ pipeline {
     }
 
     stage('Prepare .env') {
+      when { expression { return params.MANUAL_TRIGGER == true } }
       steps {
         script {
           docker.image('php:8.2-cli').inside('--user root') {
@@ -54,6 +72,7 @@ pipeline {
     }
 
     stage('Node: Install & Build Assets') {
+      when { expression { return params.MANUAL_TRIGGER == true } }
       steps {
         script {
           docker.image('node:20').inside {
@@ -67,6 +86,7 @@ pipeline {
     }
 
     stage('Run Tests (PHPUnit)') {
+      when { expression { return params.MANUAL_TRIGGER == true } }
       steps {
         script {
           docker.image('php:8.2-cli').inside('--user root') {
@@ -82,6 +102,7 @@ pipeline {
     }
 
     stage('Report & Archive') {
+      when { expression { return params.MANUAL_TRIGGER == true } }
       steps {
         script {
           // Publish JUnit, archive assets
