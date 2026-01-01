@@ -1,30 +1,18 @@
 pipeline {
     agent any
 
-    options {
-        timestamps()
-    }
-
     stages {
-
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
-                sh 'composer install --no-interaction --prefer-dist'
+                bat 'composer install --no-interaction'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'php artisan test'
+                bat 'php artisan test'
             }
         }
-
     }
 
     post {
@@ -36,5 +24,3 @@ pipeline {
         }
     }
 }
-
-
