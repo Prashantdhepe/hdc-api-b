@@ -69,7 +69,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh """
+                    bat """
                         docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
                         docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
                     """
