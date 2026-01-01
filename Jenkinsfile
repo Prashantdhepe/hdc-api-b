@@ -19,12 +19,22 @@ pipeline {
             }
         }
 
+        stage('Prepare Environment') {
+            steps {
+                bat '''
+                if not exist .env (
+                    copy .env.example .env
+                )
+                php artisan key:generate --force
+                '''
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 bat 'php artisan test'
             }
         }
-
     }
 
     post {
