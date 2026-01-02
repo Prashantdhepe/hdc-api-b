@@ -1,3 +1,5 @@
+//1. when docker is not used its only trigger the jenkins after code commit 
+
 // pipeline {
 //     agent any
 
@@ -47,6 +49,54 @@
 //     }
 // }
 
+
+//2. when docker is used to build the image after code commit
+
+
+// pipeline {
+//     agent any
+
+//     options {
+//         timestamps()
+//     }
+
+//     environment {
+//         IMAGE_NAME = "hdc-api"
+//     }
+
+//     stages {
+
+//         stage('Checkout Code') {
+//             steps {
+//                 checkout scm
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 script {
+//                     bat """
+//                         docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+//                         docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
+//                     """
+//                 }
+//             }
+//         }
+
+//     }
+
+//     post {
+//         success {
+//             echo "✅ Docker image built successfully: ${IMAGE_NAME}:${BUILD_NUMBER}"
+//         }
+//         failure {
+//             echo "❌ Docker image build failed"
+//         }
+//     }
+// }
+
+//2  by this push the docker image to the docker hub after code commit
+
 pipeline {
     agent any
 
@@ -55,7 +105,8 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "hdc-api"
+        IMAGE_NAME = "prashantdev/hdc-api"
+        DOCKER_CREDS = credentials('dockerhub_creds')
     }
 
     stages {
@@ -68,24 +119,39 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    bat """
-                        docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
-                        docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
-                    """
-                }
+                bat """
+                    docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
+                """
             }
         }
 
+        stage('Docker Login') {
+            steps {
+                bat """
+                    echo "${DOCKER_CREDS_PSW}" | docker login -u "${DOCKER_CREDS_USR}" --password-stdin
+                """
+            }
+        }
+
+        stage('Push Image to Registry') {
+            steps {
+                bat """
+                    docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    docker push ${IMAGE_NAME}:latest
+                """
+            }
+        }
     }
 
     post {
         success {
-            echo "✅ Docker image built successfully: ${IMAGE_NAME}:${BUILD_NUMBER}"
+            echo "✅ Docker image pushed: ${IMAGE_NAME}:${BUILD_NUMBER}"
         }
-        failure {
-            echo "❌ Docker image build failed"
+        always {
+            bat 'docker logout'
         }
     }
 }
+
 
