@@ -105,7 +105,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "prashantdev/hdc-api"
+        IMAGE_NAME = "prashantdhepe/hdc-api"
         DOCKER_CREDS = credentials('dockerhub_creds')
     }
 
