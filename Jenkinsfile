@@ -126,13 +126,27 @@ pipeline {
             }
         }
 
+        // stage('Docker Login') {
+        //     steps {
+        //         bat """
+        //             echo "${DOCKER_CREDS_PSW}" | docker login -u "${DOCKER_CREDS_USR}" --password-stdin
+        //         """
+        //     }
+        // }
         stage('Docker Login') {
             steps {
-                bat """
-                    echo "${DOCKER_CREDS_PSW}" | docker login -u "${DOCKER_CREDS_USR}" --password-stdin
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat '''
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    '''
+                }
             }
         }
+
 
         stage('Push Image to Registry') {
             steps {
