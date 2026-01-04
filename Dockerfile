@@ -1,63 +1,34 @@
-# FROM php 8.2-fpm
+FROM php:8.2-fpm-alpine
 
-# RUN apt-get update && apt-get install -y \
-#     git \
-#     unzip \
-#     libzip-dev \
-#     libpng-dev \
-#     libonig-dev \
-#     libxml2-dev \
-#     zip \
-#     curl
+# System deps
+RUN apk add --no-cache \
+    bash \
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    zip \
+    unzip
 
-# RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+# PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql intl zip
 
-# COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# WORKDIR /var/www/api
-
-# COPY . .
-
-# RUN composer install --no-dev --optimize-autoloader
-
-# RUN chown -R www-data:www-data /var/www/api/storage /var/www/api/bootstrap/cache
-
-# EXPOSE 9000
-
-# CMD ["php-fpm"]
-
-# Base PHP image
-FROM php:8.2-fpm
-
-# Set working directory
 WORKDIR /var/www
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    zip \
-    unzip \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    libicu-dev \
-    && docker-php-ext-install intl pdo_mysql mbstring zip exif pcntl bcmath gd
+# Copy composer files first (cache optimization)
+COPY composer.json composer.lock ./
 
-
-# Install Composer
+# Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy application files
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copy full project
 COPY . .
 
-# Set permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www
+    && chmod -R 775 storage bootstrap/cache
 
-# Expose PHP-FPM port
 EXPOSE 9000
-
-# Start PHP-FPM
 CMD ["php-fpm"]
