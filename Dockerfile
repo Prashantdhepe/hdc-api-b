@@ -42,7 +42,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd \
+    libicu-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
