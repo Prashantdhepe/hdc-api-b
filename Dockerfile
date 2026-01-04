@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine
 
-# System deps
+# System dependencies
 RUN apk add --no-cache \
     bash \
     icu-dev \
@@ -9,15 +9,15 @@ RUN apk add --no-cache \
     zip \
     unzip
 
-# PHP extensions
+# PHP extensions (IMPORTANT: intl)
 RUN docker-php-ext-install pdo pdo_mysql intl zip
 
 WORKDIR /var/www
 
-# Copy EVERYTHING first (artisan must exist)
+# Copy full project (artisan MUST exist)
 COPY . .
 
-# Install composer
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install dependencies
@@ -29,3 +29,4 @@ RUN chown -R www-data:www-data /var/www \
 
 EXPOSE 9000
 CMD ["php-fpm"]
+
