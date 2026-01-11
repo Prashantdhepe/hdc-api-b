@@ -60,7 +60,8 @@ class StandardResource extends Resource
                         ->columns(1)
                         ->image()
                         ->multiple()
-                        ->disk('public')
+                        // ->disk('public')
+                        ->disk(config('filesystems.default'))
                         ->directory('class_images')
                         ->required()
                         ->columnSpan(2),

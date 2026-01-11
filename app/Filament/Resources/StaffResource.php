@@ -55,6 +55,7 @@ class StaffResource extends Resource
                                     ->required(),
                                 Forms\Components\FileUpload::make('photo')
                                     ->required()
+                                    ->disk(config('filesystems.default'))
                                     ->directory('staff_photos')
                             ])
                     ])

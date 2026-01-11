@@ -49,6 +49,7 @@ class BannerResource extends Resource
                                 ->required()
                                 ->enableDownload()
                                 ->enableOpen()
+                                ->disk(config('filesystems.default'))
                                 ->directory('banners')
                                 ->storeFileNamesIn('original_filenames')
                                 ->columnSpan(2),

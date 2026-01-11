@@ -53,7 +53,7 @@ class GalleryResource extends Resource
                                     ->required(fn ($get) => $get('media_type') === 'image')
                                     ->visible(fn ($get) => $get('media_type') === 'image')
                                     ->dehydrated(fn ($get) => $get('media_type') === 'image')
-                                    ->disk('public')
+                                    ->disk(config('filesystems.default'))
                                     ->directory('galleries')
                                     ->columnSpan(2),
 

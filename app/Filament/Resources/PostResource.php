@@ -66,6 +66,7 @@ class PostResource extends Resource
                                     ->enableReordering()
                                     ->enableDownload()
                                     ->enableOpen()
+                                    ->disk(config('filesystems.default'))
                                     ->directory('media_galleries')
                                     ->storeFileNamesIn('media_gallery_original_filenames')
                                     ->columnSpan(2),
