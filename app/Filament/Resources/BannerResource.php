@@ -52,6 +52,7 @@ class BannerResource extends Resource
                                 ->disk(config('filesystems.default'))
                                 ->directory('banners')
                                 ->visibility('public')
+                                ->dehydrated(true)
                                 ->storeFileNamesIn('original_filenames')
                                 ->columnSpan(2),
                         ])
