@@ -18,6 +18,7 @@ use Filament\Forms\Components\MultipleFileUpload;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BannerResource extends Resource
 {
@@ -54,6 +55,9 @@ class BannerResource extends Resource
                                 ->visibility('public')
                                 ->dehydrated(true)
                                 ->storeFileNamesIn('original_filenames')
+                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) {
+                                    return $file->store('banners', config('filesystems.default'));
+                                })
                                 ->columnSpan(2),
                         ])
                 ])
