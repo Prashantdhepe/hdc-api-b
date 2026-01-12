@@ -51,6 +51,7 @@ class BannerResource extends Resource
                                 ->enableOpen()
                                 ->disk(config('filesystems.default'))
                                 ->directory('banners')
+                                ->visibility('public')
                                 ->storeFileNamesIn('original_filenames')
                                 ->columnSpan(2),
                         ])
@@ -63,7 +64,8 @@ class BannerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('directory'),
+                Tables\Columns\ImageColumn::make('directory')
+                    ->disk(config('filesystems.default')),
                 Tables\Columns\TextColumn::make('title')->sortable(),
                 Tables\Columns\TextColumn::make('content'),
                 Tables\Columns\IconColumn::make('is_published')
