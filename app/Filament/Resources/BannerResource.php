@@ -19,7 +19,6 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class BannerResource extends Resource
 {
@@ -51,14 +50,13 @@ class BannerResource extends Resource
                                 ->required()
                                 ->enableDownload()
                                 ->enableOpen()
-                                // ->disk(config('filesystems.default'))
+                                ->disk(config('filesystems.default'))
                                 ->directory('banners')
                                 ->visibility('public')
                                 ->dehydrated(true)
                                 ->storeFileNamesIn('original_filenames')
                                 ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) {
-                                    return Storage::disk(config('filesystems.default'))
-                                        ->putFile('banners', $file);
+                                    return $file->store('banners', config('filesystems.default'));
                                 })
                                 ->columnSpan(2),
                         ])
