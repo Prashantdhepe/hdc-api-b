@@ -56,7 +56,9 @@ class BannerResource extends Resource
                                 ->dehydrated(true)
                                 ->storeFileNamesIn('original_filenames')
                                 ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) {
-                                    return $file->store('banners', config('filesystems.default'));
+                                    // Use storePublicly so files uploaded to S3 are public when using the 's3' disk.
+                                    // The actual disk is determined by FILESYSTEM_DRIVER in your environment (.env).
+                                    return $file->storePublicly('banners', config('filesystems.default'));
                                 })
                                 ->columnSpan(2),
                         ])
