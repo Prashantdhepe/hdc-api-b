@@ -52,7 +52,7 @@ class BannerResource extends Resource
                                 ->enableOpen()
                                 ->disk(config('filesystems.default'))
                                 ->directory('banners')
-                                ->visibility('public')
+                                ->visibility('private')
                                 ->storeFileNamesIn('original_filenames')
                                 ->columnSpan(2),
                         ])
