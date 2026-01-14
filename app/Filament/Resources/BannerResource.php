@@ -66,7 +66,16 @@ class BannerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('directory')
-                    ->disk(config('filesystems.default')),
+                    ->disk(config('filesystems.default'))
+                    ->visibility('private')
+                    ->url(function ($record) {
+                        if (config('filesystems.default') === 's3') {
+                            return Storage::disk('s3')
+                                ->temporaryUrl($record->directory, now()->addMinutes(10));
+                        }
+
+                        return Storage::disk('public')->url($record->directory);
+                    }),
                 Tables\Columns\TextColumn::make('title')->sortable(),
                 Tables\Columns\TextColumn::make('content'),
                 Tables\Columns\IconColumn::make('is_published')
