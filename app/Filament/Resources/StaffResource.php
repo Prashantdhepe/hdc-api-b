@@ -77,21 +77,15 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('name'),
                 ImageColumn::make('photo')
                     ->square()
-                    ->disk(config('filesystems.default'))
+                     ->disk(config('filesystems.default'))
                     ->visibility('private')
                     ->url(function ($record) {
-                        if (!$record->photo) {
-                            return null;
-                        }
-
-                        $photoPath = $record->photo;
-                        
                         if (config('filesystems.default') === 's3') {
                             return Storage::disk('s3')
-                                ->temporaryUrl($photoPath, now()->addMinutes(10));
+                                ->temporaryUrl($record->photo, now()->addMinutes(10));
                         }
 
-                        return Storage::disk('public')->url($photoPath);
+                        return Storage::disk('public')->url($record->photo);
                     }),
                 Tables\Columns\TextColumn::make('mobile_no'),
                 Tables\Columns\TextColumn::make('qualification'),
