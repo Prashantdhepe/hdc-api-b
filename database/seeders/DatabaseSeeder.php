@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             SchoolTypesSeeder::class,
             StaffTypeSeeder::class,
             StandardTypeSeeder::class,
-            PostcategorySeeder::class
+            // PostcategorySeeder::class
         ]);
     }
 }
