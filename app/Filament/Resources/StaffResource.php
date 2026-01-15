@@ -23,6 +23,8 @@ class StaffResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
+    protected static ?string $navigationGroup = "Staff Management";
+
     public static function form(Form $form): Form
     {
         return $form
@@ -78,12 +80,18 @@ class StaffResource extends Resource
                     ->disk(config('filesystems.default'))
                     ->visibility('private')
                     ->url(function ($record) {
-                        if (config('filesystems.default') === 's3') {
-                            return Storage::disk('s3')
-                                ->temporaryUrl($record->directory, now()->addMinutes(10));
+                        if (!$record->photo) {
+                            return null;
                         }
 
-                        return Storage::disk('public')->url($record->directory);
+                        $photoPath = $record->photo;
+                        
+                        if (config('filesystems.default') === 's3') {
+                            return Storage::disk('s3')
+                                ->temporaryUrl($photoPath, now()->addMinutes(10));
+                        }
+
+                        return Storage::disk('public')->url($photoPath);
                     }),
                 Tables\Columns\TextColumn::make('mobile_no'),
                 Tables\Columns\TextColumn::make('qualification'),
