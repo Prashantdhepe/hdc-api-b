@@ -55,6 +55,7 @@ class GalleryResource extends Resource
                                     ->dehydrated(fn ($get) => $get('media_type') === 'image')
                                     ->disk(config('filesystems.default'))
                                     ->directory('galleries')
+                                    ->visibility('private')
                                     ->columnSpan(2),
 
                                 Forms\Components\TextInput::make('youtube_url')
