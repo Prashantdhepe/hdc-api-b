@@ -68,6 +68,7 @@ class PostResource extends Resource
                                     ->enableOpen()
                                     ->disk(config('filesystems.default'))
                                     ->directory('media_galleries')
+                                    ->visibility('private')
                                     ->storeFileNamesIn('media_gallery_original_filenames')
                                     ->columnSpan(2),
                             ])

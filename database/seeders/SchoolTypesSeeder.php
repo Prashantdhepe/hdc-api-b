@@ -14,13 +14,13 @@ class SchoolTypesSeeder extends Seeder
     public function run(): void
     {
         SchoolType::create([
-            'name' => 'ERA Kids, A Play School',
-            'slug' => 'era-kids'
+            'name' => 'HDC Kids, A Play School',
+            'slug' => 'hdc-kids'
         ]);
 
         SchoolType::create([
-            'name' => 'ERA International',
-            'slug' => 'era-international'
+            'name' => 'HDC International',
+            'slug' => 'hdc-international'
         ]);
     }
 }

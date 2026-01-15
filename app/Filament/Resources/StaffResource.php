@@ -15,6 +15,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\ImageColumn;
+use Illuminate\Support\Facades\Storage;
 
 class StaffResource extends Resource
 {
@@ -56,7 +57,9 @@ class StaffResource extends Resource
                                 Forms\Components\FileUpload::make('photo')
                                     ->required()
                                     ->disk(config('filesystems.default'))
+                                    ->visibility('private')
                                     ->directory('staff_photos')
+                                    ->storeFileNamesIn('original_filenames'),
                             ])
                     ])
 
@@ -70,7 +73,18 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('school_type.name'),
                 Tables\Columns\TextColumn::make('staff_type.name'),
                 Tables\Columns\TextColumn::make('name'),
-                ImageColumn::make('photo')->square(),
+                ImageColumn::make('photo')
+                    ->square()
+                    ->disk(config('filesystems.default'))
+                    ->visibility('private')
+                    ->url(function ($record) {
+                        if (config('filesystems.default') === 's3') {
+                            return Storage::disk('s3')
+                                ->temporaryUrl($record->directory, now()->addMinutes(10));
+                        }
+
+                        return Storage::disk('public')->url($record->directory);
+                    }),
                 Tables\Columns\TextColumn::make('mobile_no'),
                 Tables\Columns\TextColumn::make('qualification'),
             ])

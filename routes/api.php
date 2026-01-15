@@ -73,10 +73,15 @@ Route::get('v1/activities/{school_type}', function ($school_type) {
 
     $school = SchoolType::firstWhere('slug', $school_type);
     if (!$school) {
-        return false;
+        return response()->json(['message' => 'School type not found'], 404);
     }
     $schoolId = $school->id;
     $postCategory = PostCategory::firstWhere('slug', 'activities');
+    
+    if (!$postCategory) {
+        return response()->json(['school' => $school->name, 'posts' => []]);
+    }
+    
     $posts = $postCategory->posts()->where('school_type_id', $schoolId)->orderBy('created_at', 'desc')->get();
     return [
         'school' => $school->name,

@@ -47,6 +47,14 @@ class PostCategorySeeder extends Seeder
                     ],
                 ]
             ],
+            [
+                'name' => 'Activities',
+                'slug' => 'activities',
+            ],
+            [
+                'name' => 'Achievements',
+                'slug' => 'achievements',
+            ],
         ];
     }
 }

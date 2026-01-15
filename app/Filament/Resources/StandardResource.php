@@ -63,6 +63,7 @@ class StandardResource extends Resource
                         // ->disk('public')
                         ->disk(config('filesystems.default'))
                         ->directory('class_images')
+                        ->visibility('private')
                         ->required()
                         ->columnSpan(2),
                     ])
