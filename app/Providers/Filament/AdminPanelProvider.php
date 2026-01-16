@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->authGuard('web')
+            ->favicon(asset('hdc-logo1.png'))
             ->colors([
                 'primary' => Color::Amber,
             ])
