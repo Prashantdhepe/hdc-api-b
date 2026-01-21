@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdc-api
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hdc-api
+  template:
+    metadata:
+      labels:
+        app: hdc-api
+    spec:
+      containers:
+        - name: hdc-api
+          image: prashantdhepe/hdc-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          # envFrom:
+          #   - configMapRef:
+          #       name: hdc-api-config

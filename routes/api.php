@@ -29,6 +29,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+// Health Check (MANDATORY in k8s)
+Route::get('/health', fn () => response()->json(['status' => 'ok']));
+
+
 Route::get('v1/users/{id}', function ($id) {
     return User::findOrFail($id);
 });

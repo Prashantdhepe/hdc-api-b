@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdc-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hdc-frontend
+  template:
+    metadata:
+      labels:
+        app: hdc-frontend
+    spec:
+      containers:
+        - name: hdc-frontend
+          image: prashantdhepe/hdc-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
