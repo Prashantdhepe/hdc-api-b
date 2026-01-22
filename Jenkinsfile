@@ -223,6 +223,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 bat '''
+                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+
+                    kubectl config use-context minikube
                     kubectl config current-context
                     kubectl get nodes
 
