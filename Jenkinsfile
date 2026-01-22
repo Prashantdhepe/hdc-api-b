@@ -223,7 +223,10 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 bat '''
-                    kubectl apply -f k8s/backend/ --validate=false
+                    kubectl config current-context
+                    kubectl get nodes
+
+                    kubectl apply -f k8s/backend/
                     kubectl rollout restart deployment hdc-api
                 '''
             }
