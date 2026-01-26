@@ -22,6 +22,8 @@ spec:
           ports:
             - containerPort: 8000
 
-          # envFrom:
-          #   - configMapRef:
-          #       name: hdc-api-config
+          envFrom:
+            - configMapRef:
+                name: hdc-api-env
+            - secretRef:
+                name: hdc-api-secret
